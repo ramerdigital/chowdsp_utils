@@ -72,6 +72,7 @@ public:
         const auto numSamples = block.getNumSamples();
 
         size_t outNumSamples = 0;
+        #pragma clang loop vectorize(enable)
         for (int ch = 0; ch < numChannels; ++ch)
         {
             outNumSamples = resamplers[(size_t) ch].process (block.getReadPointer (ch),

@@ -103,6 +103,7 @@ public:
 
         if (leftoverAvailable) // pop leftover samples
         {
+            #pragma clang loop vectorize(enable)
             for (int ch = 0; ch < outputBlock.getNumChannels(); ++ch)
             {
                 auto* destData = outputBlock.getWritePointer (ch);
@@ -117,6 +118,7 @@ public:
         // do we have exactly the right number of samples to fill the output buffer?
         if (availableSamples == expectedSamples)
         {
+            #pragma clang loop vectorize(enable)
             for (int ch = 0; ch < outputBlock.getNumChannels(); ++ch)
             {
                 const auto* srcData = outBlockTemp.getReadPointer (ch);
@@ -129,6 +131,7 @@ public:
         // we have some extra samples after the buffer is filled!
         if (availableSamples > expectedSamples)
         {
+            #pragma clang loop vectorize(enable)
             for (int ch = 0; ch < outputBlock.getNumChannels(); ++ch)
             {
                 const auto* srcData = outBlockTemp.getReadPointer (ch);
