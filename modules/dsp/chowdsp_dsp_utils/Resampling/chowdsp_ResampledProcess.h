@@ -3,7 +3,7 @@
 namespace chowdsp
 {
 /** Processor for up/downsampling a signal by a non-integer factor */
-template <typename ResamplerType>
+template <typename ResamplerType, int MaxChannels = 8>
 class ResampledProcess
 {
 public:
@@ -144,8 +144,8 @@ public:
     }
 
 private:
-    ResamplingProcessor<ResamplerType> inputResampler;
-    ResamplingProcessor<ResamplerType> outputResampler;
+    ResamplingProcessor<ResamplerType, MaxChannels> inputResampler;
+    ResamplingProcessor<ResamplerType, MaxChannels> outputResampler;
 
     float baseFs = 48000.0f;
 
