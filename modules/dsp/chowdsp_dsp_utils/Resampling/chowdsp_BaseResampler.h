@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 namespace chowdsp
 {
 /** Various methods for resampling, that may be used with ResamplingProcessor or ResampledProcess */
@@ -37,4 +39,8 @@ namespace ResamplingTypes
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BaseResampler)
     };
 } // namespace ResamplingTypes
+
+template <typename T>
+concept Resampler = std::derived_from<T, ResamplingTypes::BaseResampler>;
+
 } // namespace chowdsp

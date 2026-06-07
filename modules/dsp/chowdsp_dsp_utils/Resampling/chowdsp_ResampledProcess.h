@@ -3,11 +3,10 @@
 namespace chowdsp
 {
 /** Processor for up/downsampling a signal by a non-integer factor */
-template <typename ResamplerType, int MaxChannels = 8>
+template <Resampler ResamplerType, int MaxChannels = 8>
 class ResampledProcess
 {
 public:
-    static_assert (std::is_base_of_v<ResamplingTypes::BaseResampler, ResamplerType>, "ResamplerType must be derived from BaseResampler");
 
     ResampledProcess() = default;
 

@@ -10,11 +10,10 @@ namespace chowdsp
  *  may not be enough to fill the required output buffer, so it
  *  might be necessary to buffer some extra samples.
  */
-template <typename ResamplerType, int MaxChannels = 8>
+template <Resampler ResamplerType, int MaxChannels = 8>
 class ResamplingProcessor
 {
 public:
-    static_assert (std::is_base_of_v<ResamplingTypes::BaseResampler, ResamplerType>, "ResamplerType must be derived from BaseResampler");
 
     /** Default constructor */
     ResamplingProcessor() = default;
