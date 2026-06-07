@@ -61,6 +61,12 @@ public:
         return numActiveChannels > 0 ? resamplers[0].getResampleRatio() : 1.0f;
     }
 
+    /** Returns the latency of the resampler in samples at the input rate */
+    [[nodiscard]] int getLatencySamples() const noexcept
+    {
+        return numActiveChannels > 0 ? resamplers[0].getLatencySamples() : 0;
+    }
+
     /** Processes an input block of samples
      * 
      *  @return the output block of generated samples at the new sample rate

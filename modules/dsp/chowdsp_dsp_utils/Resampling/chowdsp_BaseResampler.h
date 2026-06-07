@@ -17,6 +17,9 @@ namespace ResamplingTypes
         /** Default destructor */
         virtual ~BaseResampler() = default;
 
+        /** Returns the latency of the resampler in samples at the input rate */
+        [[nodiscard]] virtual int getLatencySamples() const noexcept { return 0; }
+
         /** Prepares the resampler for a given input sample rate */
         virtual void prepare (double sampleRate, double startRatio = 1.0) = 0;
 

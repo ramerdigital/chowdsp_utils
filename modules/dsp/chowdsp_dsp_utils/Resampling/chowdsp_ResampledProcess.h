@@ -66,6 +66,18 @@ public:
         return inputResampler.getResampleRatio();
     }
 
+    /** Returns the total roundtrip latency of the resampler process in samples at baseFs */
+    [[nodiscard]] int getLatencySamples() const noexcept
+    {
+        float ratio = getResampleRatio();
+        if (ratio == 1.0f)
+            return 0;
+
+        int inputLatency = inputResampler.getLatencySamples();
+        int outputLatency = (int) std::round (outputResampler.getLatencySamples() / ratio);
+        return inputLatency + outputLatency;
+    }
+
     /** Returns the target sample rate */
     [[nodiscard]] float getTargetSampleRate() const noexcept
     {
