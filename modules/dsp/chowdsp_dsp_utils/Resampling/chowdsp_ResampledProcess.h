@@ -74,7 +74,7 @@ public:
             return 0;
 
         int inputLatency = inputResampler.getLatencySamples();
-        int outputLatency = (int) std::round (outputResampler.getLatencySamples() / ratio);
+        int outputLatency = (int) std::round (static_cast<float> (outputResampler.getLatencySamples()) / ratio);
         return inputLatency + outputLatency;
     }
 
