@@ -10,11 +10,10 @@ namespace chowdsp
  *  may not be enough to fill the required output buffer, so it
  *  might be necessary to buffer some extra samples.
  */
-template <typename ResamplerType>
+template <Resampler ResamplerType, int MaxChannels = 8>
 class ResamplingProcessor
 {
 public:
-    static_assert (std::is_base_of_v<ResamplingTypes::BaseResampler, ResamplerType>, "ResamplerType must be derived from BaseResampler");
 
     /** Default constructor */
     ResamplingProcessor() = default;
@@ -28,19 +27,21 @@ public:
     /** Prepares the resampler to process a new stream of data */
     void prepare (const juce::dsp::ProcessSpec& spec, double startRatio = 1.0)
     {
-        resamplers = std::vector<ResamplerType> (spec.numChannels);
-        for (auto& r : resamplers)
-            r.prepare (spec.sampleRate, startRatio);
+        jassert ((int) spec.numChannels <= MaxChannels);
+        numActiveChannels = juce::jmin ((int) spec.numChannels, MaxChannels);
 
-        outputBuffer.setMaxSize ((int) spec.numChannels,
+        for (int ch = 0; ch < numActiveChannels; ++ch)
+            resamplers[(size_t) ch].prepare (spec.sampleRate, startRatio);
+
+        outputBuffer.setMaxSize (numActiveChannels,
                                  (int) spec.maximumBlockSize * 20);
     }
 
     /** Resets the state of the resampler */
     void reset()
     {
-        for (auto& r : resamplers)
-            r.reset();
+        for (int ch = 0; ch < numActiveChannels; ++ch)
+            resamplers[(size_t) ch].reset();
     }
 
     /** Sets the ratio of output sample rate over input sample rate
@@ -50,14 +51,20 @@ public:
     void setResampleRatio (float ratio)
     {
         auto ratioClamped = juce::jlimit (0.01f, 100.0f, ratio);
-        for (auto& r : resamplers)
-            r.setResampleRatio (ratioClamped);
+        for (int ch = 0; ch < numActiveChannels; ++ch)
+            resamplers[(size_t) ch].setResampleRatio (ratioClamped);
     }
 
     /** Returns the ratio of output sample rate over input sample rate */
     [[nodiscard]] float getResampleRatio() const noexcept
     {
-        return resamplers[0].getResampleRatio();
+        return numActiveChannels > 0 ? resamplers[0].getResampleRatio() : 1.0f;
+    }
+
+    /** Returns the latency of the resampler in samples at the input rate */
+    [[nodiscard]] int getLatencySamples() const noexcept
+    {
+        return numActiveChannels > 0 ? resamplers[0].getLatencySamples() : 0;
     }
 
     /** Processes an input block of samples
@@ -66,7 +73,7 @@ public:
      */
     BufferView<float> process (const BufferView<const float>& block) noexcept
     {
-        const auto numChannels = block.getNumChannels();
+        const auto numChannels = juce::jmin ((int) block.getNumChannels(), numActiveChannels);
         const auto numSamples = block.getNumSamples();
 
         size_t outNumSamples = 0;
@@ -81,7 +88,8 @@ public:
     }
 
 private:
-    std::vector<ResamplerType> resamplers;
+    std::array<ResamplerType, (size_t) MaxChannels> resamplers;
+    int numActiveChannels = 0;
     Buffer<float> outputBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResamplingProcessor)

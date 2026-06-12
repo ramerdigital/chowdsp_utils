@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 namespace chowdsp
 {
 /** Various methods for resampling, that may be used with ResamplingProcessor or ResampledProcess */
@@ -14,6 +16,9 @@ namespace ResamplingTypes
 
         /** Default destructor */
         virtual ~BaseResampler() = default;
+
+        /** Returns the latency of the resampler in samples at the input rate */
+        [[nodiscard]] virtual int getLatencySamples() const noexcept { return 0; }
 
         /** Prepares the resampler for a given input sample rate */
         virtual void prepare (double sampleRate, double startRatio = 1.0) = 0;
@@ -37,4 +42,8 @@ namespace ResamplingTypes
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BaseResampler)
     };
 } // namespace ResamplingTypes
+
+template <typename T>
+concept Resampler = std::derived_from<T, ResamplingTypes::BaseResampler>;
+
 } // namespace chowdsp

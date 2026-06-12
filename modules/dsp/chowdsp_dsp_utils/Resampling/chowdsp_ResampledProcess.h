@@ -3,11 +3,10 @@
 namespace chowdsp
 {
 /** Processor for up/downsampling a signal by a non-integer factor */
-template <typename ResamplerType>
+template <Resampler ResamplerType, int MaxChannels = 8>
 class ResampledProcess
 {
 public:
-    static_assert (std::is_base_of_v<ResamplingTypes::BaseResampler, ResamplerType>, "ResamplerType must be derived from BaseResampler");
 
     ResampledProcess() = default;
 
@@ -65,6 +64,18 @@ public:
     [[nodiscard]] float getResampleRatio() const noexcept
     {
         return inputResampler.getResampleRatio();
+    }
+
+    /** Returns the total roundtrip latency of the resampler process in samples at baseFs */
+    [[nodiscard]] int getLatencySamples() const noexcept
+    {
+        float ratio = getResampleRatio();
+        if (ratio == 1.0f)
+            return 0;
+
+        int inputLatency = inputResampler.getLatencySamples();
+        int outputLatency = (int) std::round (static_cast<float> (outputResampler.getLatencySamples()) / ratio);
+        return inputLatency + outputLatency;
     }
 
     /** Returns the target sample rate */
@@ -144,8 +155,8 @@ public:
     }
 
 private:
-    ResamplingProcessor<ResamplerType> inputResampler;
-    ResamplingProcessor<ResamplerType> outputResampler;
+    ResamplingProcessor<ResamplerType, MaxChannels> inputResampler;
+    ResamplingProcessor<ResamplerType, MaxChannels> outputResampler;
 
     float baseFs = 48000.0f;
 
